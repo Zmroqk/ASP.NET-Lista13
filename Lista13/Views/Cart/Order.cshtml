@@ -1,0 +1,91 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Lista13.Models.ViewModel
+@model OrderViewModel
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    ViewData["Title"] = "Order";
+}
+<h1>Check your order</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Articles[0].article.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Articles[0].article.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Articles[0].article.Image)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Articles[0].article.Category)
+            </th>
+            <th>
+                Count
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Articles) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.article.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.article.Price)
+                </td>
+                <td>
+                    @if (item.article.ImagePath == null)
+                    {
+                        <img src="/upload/Question_mark.png" width=50 height=50/>
+                    }
+                    else
+                    {
+                        <img src="/@item.article.ImagePath" width=50 height=50/>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.article.Category.Name)
+                </td>
+                <td>
+                    @item.Item2
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan=100 class="h2">
+                Całkowity koszt: @ViewBag.Price  
+            </td>     
+        </tr>
+    </tbody>
+</table>
+<form asp-action="ConfirmOrder">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="OrderCredentials.Name" class="control-label"></label>
+        <input asp-for="OrderCredentials.Name" name="Name" class="form-control" />
+        <span asp-validation-for="OrderCredentials.Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderCredentials.Surname" class="control-label"></label>
+        <input asp-for="OrderCredentials.Surname" name="Surname" type="text" class="form-control" />
+        <span asp-validation-for="OrderCredentials.Surname" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderCredentials.Address" class="control-label"></label>
+        <input asp-for="OrderCredentials.Address" name="Address" class="form-control"/>
+        <span asp-validation-for="OrderCredentials.Address" class="text-danger"></span>
+        <img id="preview"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="OrderCredentials.PaymentMethod" class="control-label"></label>
+        <select asp-for="OrderCredentials.PaymentMethod" name="PaymentMethod" class="form-control" asp-items="ViewBag.PaymentMethods"></select>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Confirm Order" class="btn btn-primary" />
+    </div>
+</form>
+
+

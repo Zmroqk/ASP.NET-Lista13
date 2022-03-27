@@ -1,0 +1,147 @@
+﻿@model IEnumerable<Lista13.Models.Article>
+@{
+    ViewData["Title"] = "View";
+}
+<h1>Shop</h1>
+<h2>@ViewBag.CartMessage</h2>
+<div style="display: flex;">
+    <div class="cus-m-8 cus-simple-menu" style="width: 10rem; text-align: center;">     
+        <p class="no-margin">
+            <a asp-action="Refresh">All</a>
+        </p>
+        @foreach (var item in ViewBag.Categories)
+        {
+            <p class="no-margin">
+                <a asp-action="Index" asp-route-id="@item.Id">@item.Name</a>
+            </p>
+        }     
+    </div>
+    <div class="m-8" style="width:100%;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Price)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Image)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Category)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table_body">
+                @foreach (var item in Model) {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                        <td>
+                            @if (item.ImagePath == null)
+                            {
+                                <img src="/upload/Question_mark.png" width=50 height=50/>
+                            }
+                            else
+                            {
+                                <img src="/@item.ImagePath" width=50 height=50/>
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Category.Name)
+                        </td>
+                        @if (!User.IsInRole("Admin"))
+                        {
+                            <td>
+                                <a class="btn btn-primary" asp-controller="Cart" asp-action="AddItem" asp-route-id="@item.Id">Add to cart</a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @{
+            int param = User.IsInRole("Admin") ? 1 : 0;
+        }
+        <a class="btn-primary btn" onclick="LoadMoreProducts(event, @param)">Load more products</a>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let page = 1;
+    function LoadMoreProducts(event, isAdmin){
+        event.preventDefault();
+        const xhr = new XMLHttpRequest();
+        const isAdminTmp = isAdmin
+        xhr.onload = function () {
+            if (this.status = 200) {
+                try{
+                    const products = JSON.parse(this.responseText);
+                    const tableBody = document.getElementById("table_body");
+                    for(const i in products){
+                        const tr = document.createElement("tr");
+                        const nameElement = document.createElement("td");
+                        nameElement.innerHTML = products[i].name;
+                        const priceElement = document.createElement("td");
+                        priceElement.innerHTML = products[i].price;
+                        const imageContainerElement = document.createElement("td");
+                        const imageElement = document.createElement("img");
+                        imageElement.width = 50;
+                        imageElement.height = 50;
+                        imageElement.src = products[i].imagePath ? "/" + products[i].imagePath : "/upload/Question_mark.png";
+                        imageContainerElement.appendChild(imageElement);
+                        const categoryElement = document.createElement("td");
+                        categoryElement.innerHTML = products[i].category.name;
+                        tr.appendChild(nameElement);
+                        tr.appendChild(priceElement);
+                        tr.appendChild(imageContainerElement);
+                        tr.appendChild(categoryElement);
+                        if (isAdminTmp == 0){
+                            const buttonContainerElement = document.createElement("td")
+                            const buttonElement = document.createElement("a");
+                            buttonElement.href = "/Cart/AddItem/" + products[i].id;
+                            buttonElement.innerHTML = "Add to Cart"
+                            buttonElement.classList.add("btn-primary")
+                            buttonElement.classList.add("btn")
+                            buttonContainerElement.appendChild(buttonElement)
+                            tr.appendChild(buttonContainerElement);
+                        }
+                        tableBody.appendChild(tr);
+                    }
+                    page++;
+                }
+                catch(error){
+                    console.error(error);
+                }
+            }
+        }
+        let urlSplit = window.location.href.split('/');
+        let elements = 0;
+        if(document.getElementById("table_body").childElementCount < 5){
+            page = 0;
+            elements = document.getElementById("table_body").childElementCount;
+        }
+        let url = "/api/articles/page/" + page + "/";
+        let lastUrlElem = Number.parseInt(urlSplit.at(-1));
+        if(!isNaN(lastUrlElem)){
+            url += Number.parseInt(urlSplit.at(-1));
+        }
+        else
+            url += "-1";
+        url += "/" + elements;
+        xhr.open("get", url);
+        xhr.send();
+    }
+</script>
+}
+
+
+

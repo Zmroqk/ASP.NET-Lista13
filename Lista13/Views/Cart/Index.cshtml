@@ -1,0 +1,74 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<(Lista13.Models.Article, int)>
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    ViewData["Title"] = "View";
+}
+<h1>View</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Item1.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item1.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item1.Image)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item1.Category)
+            </th>
+            <th>
+                Count
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item1.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item1.Price)
+                </td>
+                <td>
+                    @if (item.Item1.ImagePath == null)
+                    {
+                        <img src="/upload/Question_mark.png" width=50 height=50/>
+                    }
+                    else
+                    {
+                        <img src="/@item.Item1.ImagePath" width=50 height=50/>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item1.Category.Name)
+                </td>
+                <td>
+                    <a asp-action="RemoveItem" asp-route-id="@item.Item1.Id">-</a>
+                    @item.Item2
+                    <a asp-action="AddItem" asp-route-id="@item.Item1.Id">+</a>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan=100 class="h2">
+                Całkowity koszt: @ViewBag.Price
+                @if (SignInManager.IsSignedIn(User) && ViewBag.Price != 0)
+                {
+                    <a class="btn-primary btn" asp-action="Order">Złóż zamówienie</a>
+                }       
+            </td>
+                 
+        </tr>
+    </tbody>
+        
+</table>
+
+
+
